@@ -2,7 +2,7 @@
 // ЗАМЕНИТЕ ВЕСЬ файл на этот код:
 
 import { useEffect, useState } from 'react';
-import { miniApp, initData } from '@tma.js/sdk-react';
+import { initData } from '@tma.js/sdk-react';
 
 /**
  * Хук для работы с Telegram WebApp API
