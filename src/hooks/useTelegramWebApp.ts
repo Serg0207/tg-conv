@@ -1,15 +1,15 @@
 // src/hooks/useTelegramWebApp.ts
-// ЗАМЕНИТЕ ВЕСЬ код в файле на этот:
+// ЗАМЕНИТЕ ВЕСЬ файл на этот код:
 
 import { useEffect, useState } from 'react';
-import { miniApp, initData, type User } from '@tma.js/sdk-react';
+import { miniApp, initData, type InitData } from '@tma.js/sdk-react';
 
 /**
  * Хук для работы с Telegram WebApp API
  */
 export function useTelegramWebApp() {
   const [isReady, setIsReady] = useState(false);
-  const [user, setUser] = useState<User | undefined>(undefined);
+  const [userData, setUserData] = useState<InitData | undefined>(undefined);
 
   useEffect(() => {
     // Инициализация
@@ -18,8 +18,8 @@ export function useTelegramWebApp() {
     // Получаем данные пользователя
     try {
       const restoredData = initData.restore();
-      if (restoredData?.user) {
-        setUser(restoredData.user);
+      if (restoredData) {
+        setUserData(restoredData);
       }
     } catch (error) {
       console.log('Init data not available:', error);
@@ -40,12 +40,12 @@ export function useTelegramWebApp() {
         return true;
       }
 
-      // В production отправляем реальные данные
-      if (miniApp.sendData) {
-        miniApp.sendData(dataString);
+      // В production используем postEvent для отправки данных
+      try {
+        miniApp.postEvent('web_app_data_send', { data: dataString });
         return true;
-      } else {
-        console.warn('sendData not available in this context');
+      } catch (error) {
+        console.warn('postEvent not available:', error);
         return false;
       }
     } catch (error) {
@@ -59,11 +59,11 @@ export function useTelegramWebApp() {
    */
   const showAlert = (message: string): void => {
     try {
-      if (miniApp.showAlert) {
-        miniApp.showAlert(message);
-      } else {
-        alert(message);
-      }
+      miniApp.postEvent('web_app_open_popup', {
+        title: 'Уведомление',
+        message: message,
+        buttons: [{ id: 'ok', type: 'ok' }],
+      });
     } catch (error) {
       alert(message);
     }
@@ -74,11 +74,7 @@ export function useTelegramWebApp() {
    */
   const showConfirm = async (message: string): Promise<boolean> => {
     try {
-      if (miniApp.showConfirm) {
-        return await miniApp.showConfirm(message);
-      } else {
-        return confirm(message);
-      }
+      return confirm(message);
     } catch (error) {
       return confirm(message);
     }
@@ -89,11 +85,7 @@ export function useTelegramWebApp() {
    */
   const close = (): void => {
     try {
-      if (miniApp.close) {
-        miniApp.close();
-      } else {
-        console.log('Close not available in dev mode');
-      }
+      miniApp.close();
     } catch (error) {
       console.log('Close not available:', error);
     }
@@ -131,7 +123,7 @@ export function useTelegramWebApp() {
 
   return {
     isReady,
-    user,
+    user: userData?.user,
     sendData,
     showAlert,
     showConfirm,

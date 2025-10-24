@@ -45,7 +45,7 @@ export function useCharacterSelection() {
         character_personality: selectedCharacter.personality,
         user_id: user?.id,
         username: user?.username,
-        first_name: user?.firstName,
+        first_name: user?.first_name,
         timestamp: new Date().toISOString(),
         source: 'miniapp',
       };
