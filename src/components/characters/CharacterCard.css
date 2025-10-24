@@ -1,0 +1,228 @@
+/* src/components/characters/CharacterCard.css */
+/* Создайте этот НОВЫЙ файл */
+
+.character-card {
+    position: relative;
+    background: var(--tg-theme-secondary-bg-color, #ffffff);
+    border-radius: 16px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .character-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+  
+  .character-card:active {
+    transform: translateY(-2px);
+  }
+  
+  .character-card.selected {
+    border-color: var(--tg-theme-button-color, #3390ec);
+    background: var(--tg-theme-bg-color, #f0f0f0);
+    box-shadow: 0 0 0 4px rgba(51, 144, 236, 0.1);
+  }
+  
+  .character-card.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  
+  /* Галочка выбора */
+  .character-card__checkmark {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    background: var(--tg-theme-button-color, #3390ec);
+    color: var(--tg-theme-button-text-color, #ffffff);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    animation: checkIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 2;
+  }
+  
+  @keyframes checkIn {
+    0% {
+      transform: scale(0) rotate(-180deg);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1) rotate(0deg);
+      opacity: 1;
+    }
+  }
+  
+  /* Premium бейдж */
+  .character-card__premium-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    color: #000;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    z-index: 2;
+  }
+  
+  /* Аватар */
+  .character-card__avatar {
+    width: 100px;
+    height: 100px;
+    margin: 20px auto 16px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid var(--tg-theme-hint-color, rgba(0, 0, 0, 0.1));
+    transition: all 0.3s ease;
+  }
+  
+  .character-card.selected .character-card__avatar {
+    border-color: var(--tg-theme-button-color, #3390ec);
+    box-shadow: 0 0 0 4px rgba(51, 144, 236, 0.2);
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+  
+  .character-card__emoji {
+    font-size: 48px;
+    line-height: 1;
+  }
+  
+  /* Имя */
+  .character-card__name {
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    margin: 0 0 8px 0;
+    color: var(--tg-theme-text-color, #000000);
+  }
+  
+  /* Описание */
+  .character-card__description {
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: center;
+    color: var(--tg-theme-hint-color, #999999);
+    margin: 0 0 16px 0;
+    min-height: 60px;
+  }
+  
+  /* Статистика */
+  .character-card__stats {
+    display: flex;
+    justify-content: space-around;
+    padding-top: 16px;
+    border-top: 1px solid var(--tg-theme-hint-color, rgba(0, 0, 0, 0.1));
+    margin-top: 8px;
+  }
+  
+  .character-card__stat {
+    text-align: center;
+  }
+  
+  .character-card__stat-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--tg-theme-text-color, #000000);
+    margin-bottom: 4px;
+  }
+  
+  .character-card__stat-label {
+    font-size: 12px;
+    color: var(--tg-theme-hint-color, #999999);
+  }
+  
+  /* Цена */
+  .character-card__price {
+    text-align: center;
+    margin-top: 12px;
+    padding: 8px;
+    background: var(--tg-theme-button-color, #3390ec);
+    color: var(--tg-theme-button-text-color, #ffffff);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  
+  /* Адаптивность для мобильных */
+  @media (max-width: 480px) {
+    .character-card {
+      padding: 16px;
+    }
+  
+    .character-card__avatar {
+      width: 80px;
+      height: 80px;
+    }
+  
+    .character-card__emoji {
+      font-size: 40px;
+    }
+  
+    .character-card__name {
+      font-size: 18px;
+    }
+  
+    .character-card__description {
+      font-size: 13px;
+      min-height: 50px;
+    }
+  }
+  
+  /* Анимация появления */
+  .character-card {
+    animation: fadeInUp 0.5s ease-out forwards;
+    opacity: 0;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Задержка анимации для разных карточек */
+  .character-card:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  .character-card:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  .character-card:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  .character-card:nth-child(4) {
+    animation-delay: 0.4s;
+  }
