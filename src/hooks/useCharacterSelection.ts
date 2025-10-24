@@ -1,14 +1,13 @@
 // src/hooks/useCharacterSelection.ts
-// ФИНАЛЬНАЯ ВЕРСИЯ для @tma.js/sdk-react v3.0.4
+// УПРОЩЕННАЯ ВЕРСИЯ - только Telegram WebApp API
 
 import { useState, useCallback, useEffect } from 'react';
 import type { Character } from '@/types/character';
 import { useTelegramWebApp } from './useTelegramWebApp';
-import { sendToN8n } from '@/utils/sendToN8n';
 
 /**
- * Расширенный хук для управления выбором персонажа
- * Поддерживает MainButton, Cloud Storage, улучшенную обратную связь
+ * Хук для управления выбором персонажа
+ * Отправка данных только через Telegram WebApp API
  */
 export function useCharacterSelection() {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
@@ -48,11 +47,9 @@ export function useCharacterSelection() {
   // Управление главной кнопкой при выборе персонажа
   useEffect(() => {
     if (selectedCharacter && !isLoading) {
-      // Получаем цвет кнопки, если доступен
       const buttonColor = theme?.buttonColor || '#FF6B6B';
       const buttonTextColor = theme?.buttonTextColor || '#FFFFFF';
 
-      // Показываем кнопку с именем персонажа
       setMainButton({
         text: `Выбрать ${selectedCharacter.name}`,
         isVisible: true,
@@ -63,7 +60,6 @@ export function useCharacterSelection() {
         onClick: confirmSelection,
       });
     } else if (isLoading) {
-      // Показываем загрузку
       setMainButton({
         text: 'Отправка...',
         isVisible: true,
@@ -71,11 +67,8 @@ export function useCharacterSelection() {
         isLoaderVisible: true,
       });
     } else {
-      // Скрываем кнопку если ничего не выбрано
       hideMainButton();
     }
-
-    // Cleanup - не нужен, так как хук управляет состоянием
   }, [selectedCharacter, isLoading, theme, setMainButton, hideMainButton]);
 
   /**
@@ -83,27 +76,30 @@ export function useCharacterSelection() {
    */
   const selectCharacter = useCallback(
     (character: Character) => {
-      // Средняя вибрация при выборе
       hapticFeedback('medium');
-      
       setSelectedCharacter(character);
-      
       console.log('✅ Character selected:', character.name);
     },
     [hapticFeedback],
   );
 
   /**
-   * Подтвердить выбор и отправить данные
+   * Подтвердить выбор и отправить данные боту
    */
   const confirmSelection = useCallback(async () => {
     if (!selectedCharacter) {
+      console.warn('⚠️ No character selected');
+      return false;
+    }
+
+    // Проверяем что WebApp доступен
+    if (typeof window === 'undefined' || !window.Telegram?.WebApp) {
+      console.error('❌ Telegram WebApp not available');
+      await showAlert('Приложение должно быть открыто в Telegram');
       return false;
     }
 
     setIsLoading(true);
-    
-    // Успешная вибрация
     hapticFeedback('success');
 
     try {
@@ -121,21 +117,18 @@ export function useCharacterSelection() {
         last_name: user?.lastName,
         language_code: user?.languageCode,
         timestamp: new Date().toISOString(),
-        source: 'miniapp',
-        version: '2.0',
       };
 
-      console.log('📤 Sending character selection:', dataToSend);
+      console.log('📤 Sending character selection to bot:', dataToSend);
+      console.log('👤 User data:', user);
 
-      // Отправляем в n8n
-      const n8nSuccess = await sendToN8n(dataToSend);
+      // Отправляем через Telegram WebApp API
+      const sent = sendData(dataToSend);
 
-      if (n8nSuccess) {
-        console.log('✅ Character selection sent to n8n successfully!');
+      if (sent) {
+        console.log('✅ Data sent successfully via Telegram WebApp API!');
+        console.log('📨 Bot should receive web_app_data event with this data');
         
-        // Также отправляем через Telegram WebApp API
-        sendData(dataToSend);
-
         // Показываем успешное сообщение
         await showPopup({
           title: '🎉 Успешно!',
@@ -147,13 +140,15 @@ export function useCharacterSelection() {
 
         return true;
       } else {
-        console.error('❌ Failed to send to n8n');
-        
-        // Вибрация ошибки
+        console.error('❌ Failed to send data');
         hapticFeedback('error');
         
-        // Показываем ошибку
-        await showAlert('Произошла ошибка при отправке. Попробуйте еще раз.');
+        await showAlert(
+          'Не удалось отправить данные.\n\n' +
+          'Проверьте:\n' +
+          '• Приложение открыто в Telegram\n' +
+          '• Открыто через Menu Button бота'
+        );
         
         return false;
       }
@@ -190,8 +185,6 @@ export function useCharacterSelection() {
       : [...favoriteCharacters, characterId];
     
     setFavoriteCharacters(newFavorites);
-    
-    // Сохраняем в Cloud Storage
     await saveToCloudStorage('favorite_characters', JSON.stringify(newFavorites));
     
     console.log(isFavorite ? '💔 Removed from favorites' : '❤️ Added to favorites');
@@ -212,17 +205,12 @@ export function useCharacterSelection() {
   }, [favoriteCharacters]);
 
   return {
-    // Состояние
     selectedCharacter,
     isLoading,
     favoriteCharacters,
-
-    // Основные действия
     selectCharacter,
     confirmSelection,
     resetSelection,
-
-    // Избранное
     toggleFavorite,
     isFavorite,
     getFavoriteCharacters,
